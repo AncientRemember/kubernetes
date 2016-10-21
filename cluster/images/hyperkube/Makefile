@@ -62,19 +62,47 @@ endif
 	cp ../../addons/dns/skydns-svc.yaml.base ${TEMP_DIR}/addons/singlenode/skydns-svc.yaml
 	cp ../../addons/dashboard/dashboard-controller.yaml ${TEMP_DIR}/addons/singlenode/
 	cp ../../addons/dashboard/dashboard-service.yaml ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/fluentd-elasticsearch/es-controller.yaml ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/fluentd-elasticsearch/es-service.yaml ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/fluentd-elasticsearch/kibana-controller.yaml ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/fluentd-elasticsearch/kibana-service.yaml ${TEMP_DIR}/addons/singlenode/
 
+	cp ../../addons/fluentd-elasticsearch/fluentd-proxy.yaml ${TEMP_DIR}/addons/singlenode/
+	
+	cp ../../addons/cluster-loadbalancing/glbc/default-svc-controller.yaml  ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/cluster-loadbalancing/glbc/default-svc.yaml  ${TEMP_DIR}/addons/singlenode/
+	
+	cp ../../addons/cluster-monitoring/influxdb/heapster-controller.yaml  ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/cluster-monitoring/influxdb/heapster-service.yaml  ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/cluster-monitoring/influxdb/influxdb-grafana-controller.yaml  ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/cluster-monitoring/influxdb/grafana-service.yaml  ${TEMP_DIR}/addons/singlenode/
+	cp ../../addons/cluster-monitoring/influxdb/influxdb-service.yaml  ${TEMP_DIR}/addons/singlenode/
+        
 	# Multinode addons; all singlenode addons plus kube-proxy (and soon flannel)
 	cp ${TEMP_DIR}/addons/singlenode/*.yaml ${TEMP_DIR}/addons/multinode/
 	cp kube-proxy-ds.yaml ${TEMP_DIR}/addons/multinode/kube-proxy.yaml
-
+	
 	cp ../../../_output/dockerized/bin/linux/${ARCH}/hyperkube ${TEMP_DIR}
-
+	
+	cd ${TEMP_DIR} && sed -i "/^[ |\t]*{[#|%]/d" addons/singlenode/*.yaml addons/multinode/*.yaml static-pods/*.json
+	
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *base_metrics_memory *}}@140Mi@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *metrics_memory *}}@300Mi@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *base_metrics_cpu *}}@80m@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *metrics_cpu *}}@100m@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *base_eventer_memory *}}@190Mi@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *eventer_memory *}}@206800Ki@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *metrics_memory_per_node *}}@4@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-con*.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *eventer_memory_per_node *}}@500@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-con*.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *nanny_memory *}}@94160Ki@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controller.yaml
+	cd ${TEMP_DIR} && sed -i -e "s@{{ *metrics_cpu_per_node *}}@0.5@g" addons/singlenode/heapster-cont*.yaml addons/multinode/heapster-controll*.yaml
+        
 	cd ${TEMP_DIR} && sed -i.back "s|VERSION|${VERSION}|g" addons/singlenode/*.yaml addons/multinode/*.yaml static-pods/*.json
 	cd ${TEMP_DIR} && sed -i.back "s|REGISTRY|${REGISTRY}|g" addons/singlenode/*.yaml addons/multinode/*.yaml static-pods/*.json
 	cd ${TEMP_DIR} && sed -i.back "s|ARCH|${ARCH}|g" addons/singlenode/*.yaml addons/multinode/*.yaml static-pods/*.json
+	cd ${TEMP_DIR} && sed -i.back "s|ELASTICSE${ARCH}_URL|ELASTICSEARCH_URL|g" addons/singlenode/kibana-controller.yaml addons/multinode/kibana-controller.yaml
 	cd ${TEMP_DIR} && sed -i.back "s|ARCH|${QEMUARCH}|g" Dockerfile
 	cd ${TEMP_DIR} && sed -i.back "s|BASEIMAGE|${BASEIMAGE}|g" Dockerfile
-	cd ${TEMP_DIR} && sed -i.back "s|CACHEBUST|$(shell uuidgen)|g" Dockerfile
 	cd ${TEMP_DIR} && sed -i.back "s|-amd64|-${ARCH}|g" addons/singlenode/*.yaml addons/multinode/*.yaml
 	cd ${TEMP_DIR} && sed -i.back "s|__PILLAR__DNS__REPLICAS__|1|g;s|__PILLAR__DNS__SERVER__|10.0.0.10|g;" addons/singlenode/skydns*.yaml addons/multinode/skydns*.yaml
 	cd ${TEMP_DIR} && sed -i.back "s|__PILLAR__DNS__DOMAIN__|cluster.local|g;s|__PILLAR__FEDERATIONS__DOMAIN__MAP__||g;" addons/singlenode/skydns*.yaml addons/multinode/skydns*.yaml
