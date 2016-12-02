@@ -31,11 +31,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -y \
     nfs-common \
     glusterfs-client \
     cifs-utils \
+    ceph \
+    ceph-common \
     && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # CACHEBUST
 
 RUN cp /usr/bin/nsenter /nsenter
+
 
 # Manifests for the docker guide
 COPY static-pods/master.json \
