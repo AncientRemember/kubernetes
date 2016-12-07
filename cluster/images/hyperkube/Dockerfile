@@ -17,6 +17,7 @@ FROM BASEIMAGE
 # If we're building for another architecture than amd64, the CROSS_BUILD_ placeholder is removed so e.g. CROSS_BUILD_COPY turns into COPY
 # If we're building normally, for amd64, CROSS_BUILD lines are removed
 CROSS_BUILD_COPY qemu-ARCH-static /usr/bin/
+ADD http://mirrors.163.com/.help/sources.list.jessie /etc/apt/sources.list
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update -y \
     && DEBIAN_FRONTEND=noninteractive apt-get -yy -q install \
@@ -31,14 +32,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update -y \
     nfs-common \
     glusterfs-client \
     cifs-utils \
-    ceph \
-    ceph-common \
     && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
     && DEBIAN_FRONTEND=noninteractive apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* # CACHEBUST
 
 RUN cp /usr/bin/nsenter /nsenter
-
 
 # Manifests for the docker guide
 COPY static-pods/master.json \
